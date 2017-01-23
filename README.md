@@ -1,0 +1,2 @@
+# scripter
+A screenplay generator
