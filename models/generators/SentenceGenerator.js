@@ -24,7 +24,6 @@ var SentenceGenerator = function(descr) {
     	var words = self.wordArray[type];
     	var numOfWords = words.length;
     	var pickedWord = words[getRandom(0,numOfWords)].word;
-    	console.log('picked this word: ' + pickedWord);
     	return pickedWord;
     }
 
@@ -65,7 +64,7 @@ whose
     self.generateWhQuestion = function(previousSentances,characters,narrative,scene_heading,questioner) {
     	//SIMPLEST FORM OF A WH QUESTION:
     	//PRONOUN ADVERB? VERB PREPOSITION? ADJECTIVE* NOUN
-    	return self.generateSentence({pronouns : 1, adverbs : 1, verbs : 1, prepositions: 1, adjectives : 1, nouns : 1,},'.');
+    	return self.generateSentence({pronouns : 1, adverbs : 1, verbs : 1, prepositions: 1, adjectives : 1, nouns : 1,},'?');
 
     };
 
@@ -74,50 +73,20 @@ whose
     self.generateSentence = function(sentenceStructure, punctuation) {
 
     	var sentence = '';
-    	//var sentenceArray = [];
 
-    	/*self.sentanceStructure.forEach(function(numOfWords) {
-    		var sentance = '';
-    		for(var i = 0; i<numOfWords; i++)
-    		{
-    			sentence = sentence.concat(' ');
-    			console.log('sentence at this point: ' + sentence);
-    			var newWord = pickWord()
-
-
-    		}
-			
-		});*/
-
-		//var sentence = '';
-
-		
-		/*var newWord = pickWord('nouns');
-		//newWord = newWord.replace(/\r/," ");//remove \r from word
-		sentenceArray.push(newWord);
-		console.log(newWord);
-		sentence = sentence + newWord;
-		newWord = pickWord('verbs');
-		//newWord.replace(/\r?\n|\r/,"pingo");
-		sentenceArray.push(newWord);
-		console.log(newWord);
-		sentence = sentence + newWord;*/
     	for (var type in sentenceStructure) {
 
     		console.log('length: ' + sentenceStructure[type]);
       		for(var i = 0; i<sentenceStructure[type]; i++)
-      		{
-      			//sentence = sentence.concat(' ');	
-      			//console.log('this is sentence now: ' + sentence);
+      		{      			      			
       			var newWord = pickWord(type);
-      			sentence = sentence + newWord;
-      			//console.log('sentence after concat: ' + sentence);      			
+      			sentence = sentence + newWord;      						
       		}
 
     	}
-    	//sentence.replace(/.$/,".");
-    	//sentence[0].toUppercase();
+    	    	
     	sentence = capitalizeFirstLetter(sentence);
+    	sentence = sentence.replace(/.$/, punctuation);
     	return sentence;
     }
 
