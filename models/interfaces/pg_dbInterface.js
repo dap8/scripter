@@ -118,6 +118,8 @@ self.loadInitialData = function() {
 
   }
 
+  console.log('finished noun array');
+
   for(var i = 0; i<pronounarray.length; i++)
   {
     pronounarray[i] = pronounarray[i].replace(/\r/," ");
@@ -129,6 +131,8 @@ self.loadInitialData = function() {
     adverbarray[i] = adverbarray[i].replace(/\r/," ");
     client.query('INSERT INTO ADVERBS(word) VALUES ($1)',[adverbarray[i]]);
   }
+
+  console.log('finished adverb array');
 
   for(var i = 0; i<verbarray.length; i++)
   {

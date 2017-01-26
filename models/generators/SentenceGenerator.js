@@ -28,6 +28,10 @@ var SentenceGenerator = function(descr) {
     	return pickedWord;
     }
 
+    function capitalizeFirstLetter(string) {
+    	return string.charAt(0).toUpperCase() + string.slice(1);
+	}
+
     //PUBLIC METHODS
 
     self.init = function() {
@@ -70,7 +74,7 @@ whose
     self.generateSentence = function(sentenceStructure, punctuation) {
 
     	var sentence = '';
-    	var sentenceArray = [];
+    	//var sentenceArray = [];
 
     	/*self.sentanceStructure.forEach(function(numOfWords) {
     		var sentance = '';
@@ -87,35 +91,34 @@ whose
 
 		//var sentence = '';
 
-		var tempSentance;
-		tempSentance = sentence;
-		var newWord = pickWord('nouns');
+		
+		/*var newWord = pickWord('nouns');
 		//newWord = newWord.replace(/\r/," ");//remove \r from word
 		sentenceArray.push(newWord);
 		console.log(newWord);
-		sentence = tempSentance + newWord;
+		sentence = sentence + newWord;
 		newWord = pickWord('verbs');
 		//newWord.replace(/\r?\n|\r/,"pingo");
 		sentenceArray.push(newWord);
-		tempSentance = sentence;
 		console.log(newWord);
-		sentence = tempSentance + newWord;
-    	/*for (var type in sentenceStructure) {
+		sentence = sentence + newWord;*/
+    	for (var type in sentenceStructure) {
 
     		console.log('length: ' + sentenceStructure[type]);
       		for(var i = 0; i<sentenceStructure[type]; i++)
       		{
       			//sentence = sentence.concat(' ');	
-      			console.log('this is sentence now: ' + sentence);
+      			//console.log('this is sentence now: ' + sentence);
       			var newWord = pickWord(type);
       			sentence = sentence + newWord;
-      			console.log('sentence after concat: ' + sentence);      			
+      			//console.log('sentence after concat: ' + sentence);      			
       		}
 
-    	}*/
+    	}
     	//sentence.replace(/.$/,".");
-    	//sentence(0).toUppercase();
-    	return sentenceArray;
+    	//sentence[0].toUppercase();
+    	sentence = capitalizeFirstLetter(sentence);
+    	return sentence;
     }
 
 

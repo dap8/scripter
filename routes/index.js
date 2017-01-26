@@ -7,9 +7,9 @@ var SentenceGenerator = new SentenceGeneratorModule();
 //wait for text files to load, then init the sentenceGenerator - use only when resetting data
 /*setTimeout(function(){
     SentenceGenerator.init();
-}, 3000);*/
+}, 3000);*/ 
 
-//SentenceGenerator.init();
+SentenceGenerator.init();
 
 
 
