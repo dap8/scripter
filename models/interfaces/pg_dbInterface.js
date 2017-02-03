@@ -44,14 +44,14 @@ self.init = function() {
   if(err) {
     return console.error('error fetching client from pool', err);
   }
-  var statement = 'SELECT * FROM NOUNS';
+  var statement = 'SELECT * FROM WORDS';
   var query = client.query(statement);
-  var numOfNounsFound = 0;
+  var numOfWordsFound = 0;
   query.on('row', function(row, result) {
-    numOfNounsFound++;
+    numOfWordsFound++;
     });
     query.on('end', function(result) {
-      if(numOfNounsFound < 1) self.loadInitialData();      
+      if(numOfWordsFound < 1) self.loadInitialData();      
 
     }); 
 
@@ -70,15 +70,15 @@ self.getWords = function(deliverWords, type)
   if(err) {
     return console.error('error fetching client from pool', err);
   }
-  var statement = 'SELECT * FROM '+type.toUpperCase();
-  var query = client.query(statement);
+  
+  var query = client.query('SELECT * FROM WORDS WHERE type = $1',[type]);
 
   var words = [];
   query.on('row', function(row, result) {
-      var picture = {
+      var word = {
           word : row.word,
         }
-        words.push(picture);
+        words.push(word);
     });
     query.on('end', function(result) {
       
@@ -99,58 +99,24 @@ self.loadInitialData = function() {
     return console.error('error fetching client from pool', err);
   }
 
+  var words = [];
 
-  var nounarray = fs.readFileSync('./word_textfiles/nouns/all_nouns.txt').toString().split('\n');
-  var pronounarray = fs.readFileSync('./word_textfiles/pronouns/all_pronouns.txt').toString().split('\n');
-  var adverbarray = fs.readFileSync('./word_textfiles/adverbs/all_adverbs.txt').toString().split('\n');
-  var verbarray = fs.readFileSync('./word_textfiles/verbs/all_verbs.txt').toString().split('\n');
-  var adjectivearray = fs.readFileSync('./word_textfiles/adjectives/all_adjectives.txt').toString().split('\n');
-  var prepositionarray = fs.readFileSync('./word_textfiles/prepositions/all_prepositions.txt').toString().split('\n');
+  words['noun'] = fs.readFileSync('./word_textfiles/nouns/all_nouns.txt').toString().split('\n');
+  words['pronoun'] = fs.readFileSync('./word_textfiles/pronouns/all_pronouns.txt').toString().split('\n');
+  words['adverb'] = fs.readFileSync('./word_textfiles/adverbs/all_adverbs.txt').toString().split('\n');
+  words['verb'] = fs.readFileSync('./word_textfiles/verbs/all_verbs.txt').toString().split('\n');
+  words['adjective'] = fs.readFileSync('./word_textfiles/adjectives/all_adjectives.txt').toString().split('\n');
+  words['preposition'] = fs.readFileSync('./word_textfiles/prepositions/all_prepositions.txt').toString().split('\n');
 
-  console.log('LENGTH OF ARRAY RECIEVED: ' + prepositionarray.length);
-  console.log('first prepositionarray: ' + prepositionarray[0]);
 
-  for(var i = 0; i<nounarray.length; i++)
+  for(var type in words)
   {
-    nounarray[i] = nounarray[i].replace(/\r/," ");
-
-    client.query('INSERT INTO NOUNS(word) VALUES ($1)',[nounarray[i]]);
-
-  }
-
-  console.log('finished noun array');
-
-  for(var i = 0; i<pronounarray.length; i++)
-  {
-    pronounarray[i] = pronounarray[i].replace(/\r/," ");
-    client.query('INSERT INTO PRONOUNS(word) VALUES ($1)',[pronounarray[i]]);
-  }
-
-  for(var i = 0; i<adverbarray.length; i++)
-  {
-    adverbarray[i] = adverbarray[i].replace(/\r/," ");
-    client.query('INSERT INTO ADVERBS(word) VALUES ($1)',[adverbarray[i]]);
-  }
-
-  console.log('finished adverb array');
-
-  for(var i = 0; i<verbarray.length; i++)
-  {
-    verbarray[i] = verbarray[i].replace(/\r/," ");
-    client.query('INSERT INTO VERBS(word) VALUES ($1)',[verbarray[i]]);
-  }
-
-  for(var i = 0; i<adjectivearray.length; i++)
-  {
-    adjectivearray[i] = adjectivearray[i].replace(/\r/," ");
-    client.query('INSERT INTO ADJECTIVES(word) VALUES ($1)',[adjectivearray[i]]);
-  }
-
-  for(var i = 0; i<prepositionarray.length; i++)
-  {
-    prepositionarray[i] = prepositionarray[i].replace(/\r/," ");
-    client.query('INSERT INTO PREPOSITIONS(word) VALUES ($1)',[prepositionarray[i]]);
-
+    for(var i = 0; i<words[type].length; i++)
+    {
+      var word = words[type][i];
+      word = word.replace(/\r/,"");
+      client.query('INSERT INTO WORDS(word, type, disposition) VALUES($1,$2,$3)',[word,type,'positive']);
+    }
   }
 
   done();

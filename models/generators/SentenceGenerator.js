@@ -4,8 +4,9 @@ var SentenceGenerator = function(descr) {
       self[property] = descr[property];
     }
 
-    self.questionProNouns = ["what","whatever","which","whichever","who","whoever","whom","whomever","whose"];
-    self.wordTypes = ['nouns','pronouns','verbs','adverbs','adjectives', 'prepositions'];
+    self.questionProNouns = 
+    [{word:'what'},{word:'whatever'},{word:'which'},{word:'whichever'},{word:'who'},{word:'whoever'},{word:'whom'},{word:'whomever'},{word:'whose'},];
+    self.wordTypes = ['noun','pronoun','verb','adverb','adjective', 'preposition'];
     self.wordArray = [];
     
     var pg_databaseInterfaceModule = require('../interfaces/pg_dbinterface');
@@ -21,20 +22,21 @@ var SentenceGenerator = function(descr) {
 	}
     
     function pickWord(type) {
+    	console.log('Picking word for the following type: ');
+    	console.log(type);
     	var words = self.wordArray[type];
     	var numOfWords = words.length;
     	var pickedWord = words[getRandom(0,numOfWords)].word;
     	return pickedWord;
     }
 
-    function capitalizeFirstLetter(string) {
-    	return string.charAt(0).toUpperCase() + string.slice(1);
-	}
+    function capitalizeFirstLetter(string) { return string.charAt(0).toUpperCase() + string.slice(1); }
+    function addPunctuation(string, punctuation) { return string.replace(/.$/, punctuation); }
 
     //PUBLIC METHODS
 
     self.init = function() {
-		console.log('made it to init');
+		self.wordArray['questionpronoun'] = self.questionProNouns;
 		function setWords(words, type){	self.wordArray[type] = words;	}
 		self.wordTypes.forEach(function(type) {
 			databaseInterface.getWords(setWords, type);
@@ -43,9 +45,8 @@ var SentenceGenerator = function(descr) {
 
     self.generateQuestion = function(characters,narrative,scene_heading) {
     	var question = self.generateWhQuestion(characters,narrative,scene_heading);
-    	console.log('recieved the following question: ');
+    	console.log('received the following question: ');
     	console.log(question);
-
     };
 
     /*
@@ -64,7 +65,8 @@ whose
     self.generateWhQuestion = function(previousSentances,characters,narrative,scene_heading,questioner) {
     	//SIMPLEST FORM OF A WH QUESTION:
     	//PRONOUN ADVERB? VERB PREPOSITION? ADJECTIVE* NOUN
-    	return self.generateSentence({pronouns : 1, adverbs : 1, verbs : 1, prepositions: 1, adjectives : 1, nouns : 1,},'?');
+    	//return self.generateSentence({pronoun : 1, adverb : 1, verb : 1, preposition: 1, adjective : 1, noun: 1,},'?');
+    	return self.generateSentence({questionpronoun : 1, verb : 1, adjective : 1, noun: 1,},'?');
 
     };
 
@@ -78,15 +80,16 @@ whose
 
     		console.log('length: ' + sentenceStructure[type]);
       		for(var i = 0; i<sentenceStructure[type]; i++)
-      		{      			      			
+      		{
+      			console.log(typeof type);
       			var newWord = pickWord(type);
-      			sentence = sentence + newWord;      						
+      			sentence = sentence + newWord + ' ';
       		}
 
     	}
     	    	
     	sentence = capitalizeFirstLetter(sentence);
-    	sentence = sentence.replace(/.$/, punctuation);
+    	sentence = addPunctuation(sentence, punctuation);
     	return sentence;
     }
 
