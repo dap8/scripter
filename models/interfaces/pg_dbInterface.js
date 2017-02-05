@@ -4,6 +4,7 @@ var pg_dbInterface = function() {
   var pg = require('pg');
   const url = require('url');
   var fs  = require("fs");
+  var sentiment = require('sentiment');  
 
 console.log('entered pg_dbInterface');
 
@@ -51,7 +52,7 @@ self.init = function() {
     numOfWordsFound++;
     });
     query.on('end', function(result) {
-      if(numOfWordsFound < 1) self.loadInitialData();      
+      if(numOfWordsFound < 1) self.loadInitialData(); //If the database is empty, load data  
 
     }); 
 
@@ -63,7 +64,7 @@ self.init = function() {
 
 
 
-self.getWords = function(deliverWords, type)
+/*self.getWords = function(deliverWords, type)
 {
   console.log('called getWords with type: ' + type);
   pool.connect(function(err, client, done) {
@@ -77,12 +78,70 @@ self.getWords = function(deliverWords, type)
   query.on('row', function(row, result) {
       var word = {
           word : row.word,
+          sentiment : row.sentiment,
+          grouping : row.grouping,
+          type : row.type,
         }
         words.push(word);
     });
     query.on('end', function(result) {
       
       deliverWords(words,type);
+    });
+ 
+  done();
+
+  });
+
+}*/
+
+self.getWords = function(deliverWords)
+{  
+  pool.connect(function(err, client, done) {
+  if(err) {
+    return console.error('error fetching client from pool', err);
+  }
+  
+  var query = client.query('SELECT * FROM WORDS');
+
+  var words = [];
+  var hasGrouping = false;
+  
+  query.on('row', function(row, result) {
+      var word = {
+          word : row.word,
+          sentiment : row.sentiment,
+          grouping : row.grouping,
+          type : row.type,
+        }
+      
+      hasGrouping = word.grouping !== 'none';
+
+      if(!words.hasOwnProperty(word.sentiment))
+      {
+        words[word.sentiment] = [];
+        console.log('found the following sentiment and created array: ' + word.sentiment);
+
+      } 
+
+      if(hasGrouping)
+      {
+        console.log('found a word with the grouping: ' + word.grouping);
+        if(!words[word.sentiment].hasOwnProperty(word.grouping)) words[word.sentiment][word.grouping] = [];          
+        words[word.sentiment][word.grouping].push(word);
+      }
+
+      else
+      {
+        if(!words[word.sentiment].hasOwnProperty(word.type)) words[word.sentiment][word.type] = [];          
+        words[word.sentiment][word.type].push(word);
+      }
+
+
+    });
+    query.on('end', function(result) {
+      
+      deliverWords(words);
     });
  
   done();
@@ -100,6 +159,9 @@ self.loadInitialData = function() {
   }
 
   var words = [];
+  var grouping = 'none';
+  var word = '';
+  var sentiment_value = 0;
 
   words['noun'] = fs.readFileSync('./word_textfiles/nouns/all_nouns.txt').toString().split('\n');
   words['pronoun'] = fs.readFileSync('./word_textfiles/pronouns/all_pronouns.txt').toString().split('\n');
@@ -113,9 +175,12 @@ self.loadInitialData = function() {
   {
     for(var i = 0; i<words[type].length; i++)
     {
-      var word = words[type][i];
-      word = word.replace(/\r/,"");
-      client.query('INSERT INTO WORDS(word, type, disposition) VALUES($1,$2,$3)',[word,type,'positive']);
+      grouping = 'none'; // Default grouping is -1, i.e. No grouping
+      word = words[type][i];
+      word = word.replace(/\r/,"");//Remove CR-LF symbol
+      sentiment_value = sentiment(word).score.toString();
+      if(word.startsWith('wh') && type === 'pronoun') grouping = 'wh_question';
+      client.query('INSERT INTO WORDS(word, type, sentiment, grouping) VALUES($1,$2,$3,$4)',[word,type,sentiment_value,grouping]);
     }
   }
 
