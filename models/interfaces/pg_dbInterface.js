@@ -95,7 +95,7 @@ self.init = function() {
 
 }*/
 
-self.getWords = function(deliverWords)
+self.getWords = function(deliverData, type)
 {  
   pool.connect(function(err, client, done) {
   if(err) {
@@ -120,13 +120,10 @@ self.getWords = function(deliverWords)
       if(!words.hasOwnProperty(word.sentiment))
       {
         words[word.sentiment] = [];
-        console.log('found the following sentiment and created array: ' + word.sentiment);
-
       } 
 
       if(hasGrouping)
-      {
-        console.log('found a word with the grouping: ' + word.grouping);
+      {        
         if(!words[word.sentiment].hasOwnProperty(word.grouping)) words[word.sentiment][word.grouping] = [];          
         words[word.sentiment][word.grouping].push(word);
       }
@@ -141,7 +138,7 @@ self.getWords = function(deliverWords)
     });
     query.on('end', function(result) {
       
-      deliverWords(words);
+      deliverWords(words, type);
     });
  
   done();
@@ -149,6 +146,34 @@ self.getWords = function(deliverWords)
   });
 
 }
+
+self.getSentences = function(deliverData, type)
+{  
+  pool.connect(function(err, client, done) {
+  if(err) {
+    return console.error('error fetching client from pool', err);
+  }
+  
+  var query = client.query('SELECT * FROM SENTENCES');
+
+  var sentences = [];
+  
+  query.on('row', function(row, result) {
+
+    sentences[row.type] = JSON.parse(row.structure);
+              
+    });
+    query.on('end', function(result) {
+      
+      deliverData(sentences, type);
+    });
+ 
+  done();
+
+  });
+
+}
+
 
 self.loadInitialData = function() {
 
@@ -175,13 +200,21 @@ self.loadInitialData = function() {
   {
     for(var i = 0; i<words[type].length; i++)
     {
-      grouping = 'none'; // Default grouping is -1, i.e. No grouping
+      grouping = 'none';
       word = words[type][i];
       word = word.replace(/\r/,"");//Remove CR-LF symbol
       sentiment_value = sentiment(word).score.toString();
       if(word.startsWith('wh') && type === 'pronoun') grouping = 'wh_question';
       client.query('INSERT INTO WORDS(word, type, sentiment, grouping) VALUES($1,$2,$3,$4)',[word,type,sentiment_value,grouping]);
     }
+  }
+
+  for(var type in structures)
+  {
+    console.log('inserting type: ' + type);
+    console.log('structure: ');
+    console.log(sentences.type);
+    client.query('INSERT INTO SENTENCES(type, structure) VALUES($1,$2)',[type,JSON.stringify(sentences.type)]);
   }
 
   done();
@@ -191,6 +224,13 @@ self.loadInitialData = function() {
 
 
 };
+
+
+
+var sentences = 
+{
+  wh_question : {wh_question: {min : 1, max : 1}, verb : {min : 1, max : 1}, adjective : {min : 1, max : 1}, noun: {min : 1, max : 1},},  
+}
 
 
 };
