@@ -53,6 +53,7 @@ var SentenceGenerator = function(descr) {
     function pickSentenceValues(structure)
     {
         var originalStructure = self.sentences[structure];
+        console.log('original structure: ' + originalStructure);
         var structureWithValues = [];
         var min = 1;
         var max = 1;
@@ -63,6 +64,8 @@ var SentenceGenerator = function(descr) {
             structureWithValues[type] = getRandom(min,max);
         }
 
+        console.log('structure with values: ');
+        console.log(structureWithValues);
         return structureWithValues;
     }
 
@@ -73,24 +76,12 @@ var SentenceGenerator = function(descr) {
         function setData(data, type){ self[type] = data; }
         databaseInterface.getWords(setData, 'words');
         databaseInterface.getSentences(setData, 'sentences');
-	};
+    };
 
     self.generateQuestion = function(characters,narrative,scene_heading,questioner) {
     	var question = self.generateSentence(pickSentenceValues('wh_question'),'?',5);
     	console.log('received the following question: ');
     	console.log(question);
-    };
-
-    self.generateInterrogativeSentence = function(characters,narrative,scene_heading) {
-
-    };
-
-    self.genereateImperativeSentence = function(characters,narrative,scene_heading) {
-
-    };
-
-    self.generateDeclaritiveSentance = function(characters,narrative,scene_heading) {
-
     };
 
 
@@ -116,12 +107,6 @@ var SentenceGenerator = function(descr) {
     	sentence = addPunctuation(sentence, punctuation);
     	return sentence;
     }
-
-
-
-
-
-
 
 };
 

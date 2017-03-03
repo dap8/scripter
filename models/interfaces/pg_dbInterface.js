@@ -4,7 +4,9 @@ var pg_dbInterface = function() {
   var pg = require('pg');
   const url = require('url');
   var fs  = require("fs");
-  var sentiment = require('sentiment');  
+  var sentiment = require('sentiment');
+  var wordPOS = require('wordpos');
+  var wordpos = new wordPOS();
 
 console.log('entered pg_dbInterface');
 
@@ -63,38 +65,6 @@ self.init = function() {
 };
 
 
-
-/*self.getWords = function(deliverWords, type)
-{
-  console.log('called getWords with type: ' + type);
-  pool.connect(function(err, client, done) {
-  if(err) {
-    return console.error('error fetching client from pool', err);
-  }
-  
-  var query = client.query('SELECT * FROM WORDS WHERE type = $1',[type]);
-
-  var words = [];
-  query.on('row', function(row, result) {
-      var word = {
-          word : row.word,
-          sentiment : row.sentiment,
-          grouping : row.grouping,
-          type : row.type,
-        }
-        words.push(word);
-    });
-    query.on('end', function(result) {
-      
-      deliverWords(words,type);
-    });
- 
-  done();
-
-  });
-
-}*/
-
 self.getWords = function(deliverData, type)
 {  
   pool.connect(function(err, client, done) {
@@ -138,7 +108,7 @@ self.getWords = function(deliverData, type)
     });
     query.on('end', function(result) {
       
-      deliverWords(words, type);
+      deliverData(words, type);
     });
  
   done();
@@ -161,7 +131,7 @@ self.getSentences = function(deliverData, type)
   query.on('row', function(row, result) {
 
     sentences[row.type] = JSON.parse(row.structure);
-              
+
     });
     query.on('end', function(result) {
       
@@ -178,15 +148,16 @@ self.getSentences = function(deliverData, type)
 self.loadInitialData = function() {
 
    console.log('called loadInitialData');
+   //return;
    pool.connect(function(err, client, done) {
   if(err) {
     return console.error('error fetching client from pool', err);
   }
 
-  var words = [];
-  var grouping = 'none';
-  var word = '';
-  var sentiment_value = 0;
+  const words = [];
+  let grouping = 'none';
+  let word_string = '';
+  let sentiment_value = 0;
 
   words['noun'] = fs.readFileSync('./word_textfiles/nouns/all_nouns.txt').toString().split('\n');
   words['pronoun'] = fs.readFileSync('./word_textfiles/pronouns/all_pronouns.txt').toString().split('\n');
@@ -196,32 +167,126 @@ self.loadInitialData = function() {
   words['preposition'] = fs.readFileSync('./word_textfiles/prepositions/all_prepositions.txt').toString().split('\n');
 
 
-  for(var type in words)
+  var k = 0;
+  for(let type in words)
   {
-    for(var i = 0; i<words[type].length; i++)
-    {
-      grouping = 'none';
-      word = words[type][i];
-      word = word.replace(/\r/,"");//Remove CR-LF symbol
-      sentiment_value = sentiment(word).score.toString();
-      if(word.startsWith('wh') && type === 'pronoun') grouping = 'wh_question';
-      client.query('INSERT INTO WORDS(word, type, sentiment, grouping) VALUES($1,$2,$3,$4)',[word,type,sentiment_value,grouping]);
-    }
-  }
+    //console.log('type: ' + type);
+    
+    switch(type) {
+        case 'noun':
+          for(var i = 0; i<words[type].length; i++)
+          {
+            wordpos.lookupNoun(words[type][i], function(result, word) {
+            //console.log(word);
+            let grouping = 'none';
+            let word_string = words[type][i];
+            word_string = word_string.replace(/\r/,"");//Remove CR-LF symbol
+            let sentiment_value = sentiment(word_string).score.toString();
+            if(typeof result[0] !== 'undefined') grouping = result[0].lexName;
+            client.query('INSERT INTO WORDS(word, type, sentiment, grouping) VALUES($1,$2,$3,$4)',[word_string,type,sentiment_value,grouping]);
+            k++;
+            //console.log('entering word number: ' + k + ' and it is of the type: ' + type);
+          });
+            
+          }
+          
+          break;
+        case 'verb':
+          for(var i = 0; i<words[type].length; i++)
+          {      
+            
+            wordpos.lookupVerb(words[type][i], function(result, word) {
+            let grouping = 'none';
+            let word_string = words[type][i];
+            word_string = word_string.replace(/\r/,"");//Remove CR-LF symbol
+            let sentiment_value = sentiment(word_string).score.toString();
+            if(typeof result[0] !== 'undefined') grouping = result[0].lexName;
+            client.query('INSERT INTO WORDS(word, type, sentiment, grouping) VALUES($1,$2,$3,$4)',[word_string,type,sentiment_value,grouping]);
+            k++;
+            //console.log('entering word number: ' + k + ' and it is of the type: ' + type);
+          });
+            
+          }
+          break;
+        case 'adjective':
+          for(var i = 0; i<words[type].length; i++)
+          {      
 
-  for(var type in structures)
+            wordpos.lookupAdjective(words[type][i], function(result, word) {
+            let grouping = 'none';
+            let word_string = words[type][i];
+            word_string = word_string.replace(/\r/,"");//Remove CR-LF symbol
+            let sentiment_value = sentiment(word_string).score.toString();
+            if(typeof result[0] !== 'undefined') grouping = result[0].lexName;
+            client.query('INSERT INTO WORDS(word, type, sentiment, grouping) VALUES($1,$2,$3,$4)',[word_string,type,sentiment_value,grouping]);
+            k++;
+            //console.log('entering word number: ' + k + ' and it is of the type: ' + type);
+          });
+            
+          }
+          break;
+        case 'adverb':
+          for(var i = 0; i<words[type].length; i++)
+          {      
+            
+            wordpos.lookupAdverb(words[type][i], function(result, word) {
+            let grouping = 'none';
+            let word_string = words[type][i];
+            word_string = word_string.replace(/\r/,"");//Remove CR-LF symbol
+            let sentiment_value = sentiment(word_string).score.toString();
+            if(typeof result[0] !== 'undefined') grouping = result[0].lexName;
+            client.query('INSERT INTO WORDS(word, type, sentiment, grouping) VALUES($1,$2,$3,$4)',[word_string,type,sentiment_value,grouping]);
+            k++;
+            //console.log('entering word number: ' + k + ' and it is of the type: ' + type);
+          });
+            
+          }
+          break;
+        case 'pronoun':
+          for(var i = 0; i<words[type].length; i++)
+          {      
+            let grouping = 'none';
+            let word_string = words[type][i];
+            word_string = word_string.replace(/\r/,"");//Remove CR-LF symbol
+            let sentiment_value = sentiment(word_string).score.toString();
+            if(word_string.startsWith('wh') && type === 'pronoun') grouping = 'wh_question';
+            client.query('INSERT INTO WORDS(word, type, sentiment, grouping) VALUES($1,$2,$3,$4)',[word_string,type,sentiment_value,grouping]);
+            k++;
+            //console.log('entering word number: ' + k + ' and it is of the type: ' + type);            
+          }
+          break;
+        case 'preposition':
+          for(var i = 0; i<words[type].length; i++)
+          {      
+            let grouping = 'none';
+            let word_string = words[type][i];
+            word_string = word_string.replace(/\r/,"");//Remove CR-LF symbol
+            let sentiment_value = sentiment(word_string).score.toString();
+            //if(word.startsWith('wh') && type === 'pronoun') grouping = 'wh_question';
+            client.query('INSERT INTO WORDS(word, type, sentiment, grouping) VALUES($1,$2,$3,$4)',[word_string,type,sentiment_value,grouping]);
+            k++;
+            //console.log('entering word number: ' + k + ' and it is of the type: ' + type);            
+          }
+          break;
+        default:
+          console.log('default entered');
+      }
+
+
+      
+  }
+  
+/*
+  for(var type in sentences)
   {
-    console.log('inserting type: ' + type);
-    console.log('structure: ');
-    console.log(sentences.type);
-    client.query('INSERT INTO SENTENCES(type, structure) VALUES($1,$2)',[type,JSON.stringify(sentences.type)]);
+    //console.log('inserting type: ' + type);
+ 
+    client.query('INSERT INTO SENTENCES(type, structure) VALUES($1,$2)',[type,JSON.stringify(sentences[type])]);
   }
-
+*/
   done();
 
   });
-     
-
 
 };
 
