@@ -4,11 +4,11 @@ var pg_dbInterface = function() {
   var pg = require('pg');
   const url = require('url');
   var fs  = require("fs");
-  var sentiment = require('sentiment');
-  var wordPOS = require('wordpos');
-  var wordpos = new wordPOS();
+  const sentiment = require('sentiment');
+  const wordPOS = require('wordpos');
+  const wordpos = new wordPOS();
 
-console.log('entered pg_dbInterface');
+
 
 
 //HEROKU STUFF
@@ -41,8 +41,7 @@ const config = {
 
 var pool = new pg.Pool(config);
 
-self.init = function() {
-  console.log('called init');
+self.init = function() {  
   pool.connect(function(err, client, done) {
   if(err) {
     return console.error('error fetching client from pool', err);
@@ -176,15 +175,16 @@ self.loadInitialData = function() {
         case 'noun':
           for(var i = 0; i<words[type].length; i++)
           {
+            words[type][i] = words[type][i].replace(/\r/,"");
             wordpos.lookupNoun(words[type][i], function(result, word) {
             //console.log(word);
-            let grouping = 'none';
-            let word_string = words[type][i];
-            word_string = word_string.replace(/\r/,"");//Remove CR-LF symbol
-            let sentiment_value = sentiment(word_string).score.toString();
+            grouping = 'none';
+            word_string = word;
+            //word_string = word_string.replace(/\r/,"");//Remove CR-LF symbol
+            sentiment_value = sentiment(word_string).score.toString();
             if(typeof result[0] !== 'undefined') grouping = result[0].lexName;
             client.query('INSERT INTO WORDS(word, type, sentiment, grouping) VALUES($1,$2,$3,$4)',[word_string,type,sentiment_value,grouping]);
-            k++;
+            
             //console.log('entering word number: ' + k + ' and it is of the type: ' + type);
           });
             
@@ -194,15 +194,15 @@ self.loadInitialData = function() {
         case 'verb':
           for(var i = 0; i<words[type].length; i++)
           {      
-            
+            words[type][i] = words[type][i].replace(/\r/,"");
             wordpos.lookupVerb(words[type][i], function(result, word) {
-            let grouping = 'none';
-            let word_string = words[type][i];
-            word_string = word_string.replace(/\r/,"");//Remove CR-LF symbol
-            let sentiment_value = sentiment(word_string).score.toString();
+            grouping = 'none';
+            word_string = word;
+            //word_string = word_string.replace(/\r/,"");//Remove CR-LF symbol
+            sentiment_value = sentiment(word_string).score.toString();
             if(typeof result[0] !== 'undefined') grouping = result[0].lexName;
             client.query('INSERT INTO WORDS(word, type, sentiment, grouping) VALUES($1,$2,$3,$4)',[word_string,type,sentiment_value,grouping]);
-            k++;
+            
             //console.log('entering word number: ' + k + ' and it is of the type: ' + type);
           });
             
@@ -211,15 +211,15 @@ self.loadInitialData = function() {
         case 'adjective':
           for(var i = 0; i<words[type].length; i++)
           {      
-
+            words[type][i] = words[type][i].replace(/\r/,"");
             wordpos.lookupAdjective(words[type][i], function(result, word) {
-            let grouping = 'none';
-            let word_string = words[type][i];
-            word_string = word_string.replace(/\r/,"");//Remove CR-LF symbol
-            let sentiment_value = sentiment(word_string).score.toString();
+            grouping = 'none';
+            word_string = word;
+            //word_string = word_string.replace(/\r/,"");//Remove CR-LF symbol
+            sentiment_value = sentiment(word_string).score.toString();
             if(typeof result[0] !== 'undefined') grouping = result[0].lexName;
             client.query('INSERT INTO WORDS(word, type, sentiment, grouping) VALUES($1,$2,$3,$4)',[word_string,type,sentiment_value,grouping]);
-            k++;
+            
             //console.log('entering word number: ' + k + ' and it is of the type: ' + type);
           });
             
@@ -228,15 +228,15 @@ self.loadInitialData = function() {
         case 'adverb':
           for(var i = 0; i<words[type].length; i++)
           {      
-            
+            words[type][i] = words[type][i].replace(/\r/,"");
             wordpos.lookupAdverb(words[type][i], function(result, word) {
-            let grouping = 'none';
-            let word_string = words[type][i];
-            word_string = word_string.replace(/\r/,"");//Remove CR-LF symbol
-            let sentiment_value = sentiment(word_string).score.toString();
+            grouping = 'none';
+            word_string = word;
+            //word_string = word_string.replace(/\r/,"");//Remove CR-LF symbol
+            sentiment_value = sentiment(word_string).score.toString();
             if(typeof result[0] !== 'undefined') grouping = result[0].lexName;
             client.query('INSERT INTO WORDS(word, type, sentiment, grouping) VALUES($1,$2,$3,$4)',[word_string,type,sentiment_value,grouping]);
-            k++;
+            
             //console.log('entering word number: ' + k + ' and it is of the type: ' + type);
           });
             
@@ -244,27 +244,28 @@ self.loadInitialData = function() {
           break;
         case 'pronoun':
           for(var i = 0; i<words[type].length; i++)
-          {      
-            let grouping = 'none';
-            let word_string = words[type][i];
-            word_string = word_string.replace(/\r/,"");//Remove CR-LF symbol
-            let sentiment_value = sentiment(word_string).score.toString();
+          {
+            words[type][i] = words[type][i].replace(/\r/,"");      
+            grouping = 'none';
+            word_string = words[type][i];
+            //word_string = word_string.replace(/\r/,"");//Remove CR-LF symbol
+            sentiment_value = sentiment(word_string).score.toString();
             if(word_string.startsWith('wh') && type === 'pronoun') grouping = 'wh_question';
             client.query('INSERT INTO WORDS(word, type, sentiment, grouping) VALUES($1,$2,$3,$4)',[word_string,type,sentiment_value,grouping]);
-            k++;
+            
             //console.log('entering word number: ' + k + ' and it is of the type: ' + type);            
           }
           break;
         case 'preposition':
           for(var i = 0; i<words[type].length; i++)
           {      
-            let grouping = 'none';
-            let word_string = words[type][i];
+            grouping = 'none';
+            word_string = words[type][i];
             word_string = word_string.replace(/\r/,"");//Remove CR-LF symbol
-            let sentiment_value = sentiment(word_string).score.toString();
+            sentiment_value = sentiment(word_string).score.toString();
             //if(word.startsWith('wh') && type === 'pronoun') grouping = 'wh_question';
             client.query('INSERT INTO WORDS(word, type, sentiment, grouping) VALUES($1,$2,$3,$4)',[word_string,type,sentiment_value,grouping]);
-            k++;
+            
             //console.log('entering word number: ' + k + ' and it is of the type: ' + type);            
           }
           break;
@@ -273,28 +274,43 @@ self.loadInitialData = function() {
       }
 
 
+
       
   }
   
-/*
-  for(var type in sentences)
-  {
-    //console.log('inserting type: ' + type);
- 
-    client.query('INSERT INTO SENTENCES(type, structure) VALUES($1,$2)',[type,JSON.stringify(sentences[type])]);
-  }
-*/
+
+  
+
   done();
 
   });
 
 };
 
+self.addSentences = function(){
 
+  pool.connect(function(err, client, done) {
+  if(err) {
+    return console.error('error fetching client from pool', err);
+  }
+  
+  for(let sentence_type in sentences)
+  {    
+ 
+    client.query('INSERT INTO SENTENCES(type, structure) VALUES($1,$2)',[sentence_type,JSON.stringify(sentences[sentence_type])]);
+  }
+ 
+  done();
+
+  });
+
+
+};
 
 var sentences = 
 {
-  wh_question : {wh_question: {min : 1, max : 1}, verb : {min : 1, max : 1}, adjective : {min : 1, max : 1}, noun: {min : 1, max : 1},},  
+  wh_question : {wh_question: {min : 1, max : 1}, verb : {min : 1, max : 1}, adjective : {min : 1, max : 1}, noun: {min : 1, max : 1},},
+  scene_heading : {preposition: {min: 1, max : 1}, adjective: {min: 1, max: 2}, noun: {min: 1, max: 1}, verb : {min: 1, max: 1}, noun: {min: 1, max: 1}}
 }
 
 

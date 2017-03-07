@@ -1,6 +1,6 @@
-var SentenceGenerator = function(descr) {
- 	var self = this;
-    for (var property in descr) {
+const SentenceGenerator = function(descr) {
+ 	const self = this;
+    for (let property in descr) {
       self[property] = descr[property];
     }
     
@@ -9,9 +9,18 @@ var SentenceGenerator = function(descr) {
     self.sentences = [];
     
     const NEUTRAL_VALUE = 0;
-    var pg_databaseInterfaceModule = require('../interfaces/pg_dbinterface');
-	var databaseInterface = new pg_databaseInterfaceModule();
+    const pg_databaseInterfaceModule = require('../interfaces/pg_dbinterface');
+	const databaseInterface = new pg_databaseInterfaceModule();
 	databaseInterface.init();
+    //databaseInterface.addSentences();
+    self.init = function() {
+
+        function setData(data, type){ self[type] = data; console.log(data);}
+        databaseInterface.getWords(setData, 'words');
+        databaseInterface.getSentences(setData, 'sentences');
+    };
+    self.init();
+
 
 	//PRIVATE METHODS
 
@@ -23,6 +32,7 @@ var SentenceGenerator = function(descr) {
 
     function findWords(sentiment, type)
     {
+        
         if(self.words[sentiment].hasOwnProperty(type))
         {            
             return self.words[sentiment][type];
@@ -32,7 +42,7 @@ var SentenceGenerator = function(descr) {
             return self.words[NEUTRAL_VALUE][type];
         } 
 
-        for(var sentiment in self.words)
+        for(let sentiment in self.words)
         {
             if(self.words[sentiment].hasOwnProperty(type)) return self.words[sentiment][type];
         }
@@ -41,9 +51,9 @@ var SentenceGenerator = function(descr) {
     }
     
     function pickWord(type, sentiment) {
-    	var words = findWords(sentiment,type);        
-    	var numOfWords = words.length;
-    	var pickedWord = words[getRandom(0,numOfWords)].word;
+    	let words = findWords(sentiment,type);        
+    	let numOfWords = words.length;
+    	let pickedWord = words[getRandom(0,numOfWords)];
     	return pickedWord;
     }
 
@@ -52,61 +62,98 @@ var SentenceGenerator = function(descr) {
 
     function pickSentenceValues(structure)
     {
-        var originalStructure = self.sentences[structure];
-        console.log('original structure: ' + originalStructure);
-        var structureWithValues = [];
-        var min = 1;
-        var max = 1;
-        for(var type in originalStructure)
+        let originalStructure = self.sentences[structure];        
+        let structureWithValues = [];
+        let min = 1;
+        let max = 1;
+        for(let type in originalStructure)
         {
             min = originalStructure[type].min;
             max = originalStructure[type].max;
             structureWithValues[type] = getRandom(min,max);
         }
 
-        console.log('structure with values: ');
-        console.log(structureWithValues);
         return structureWithValues;
+    }
+
+    function findSubject(sentence){
+        let subject = 'none';
+        for(let i = 0; i<sentence.length; i++)
+        {
+            if(sentence[i].type === 'noun') subject = sentence[i].grouping;
+        }
+        console.log('found the following subject',subject);
+        return subject;
     }
 
     //PUBLIC METHODS
 
-    self.init = function() {
+    
 
-        function setData(data, type){ self[type] = data; }
-        databaseInterface.getWords(setData, 'words');
-        databaseInterface.getSentences(setData, 'sentences');
+    self.generateQuestion = function(sentiment) {
+    	
+        let question = self.generateSentence(pickSentenceValues('wh_question'),'?',sentiment,null);        
+    	//console.log('received the following question: ');
+    	//console.log(question);
+        return question;
     };
 
-    self.generateQuestion = function(characters,narrative,scene_heading,questioner) {
-    	var question = self.generateSentence(pickSentenceValues('wh_question'),'?',5);
-    	console.log('received the following question: ');
-    	console.log(question);
+    self.generateResponse = function(sentiment,previousSentance){
+        
+        
+        let subject = findSubject(previousSentance.sentenceObjects);
+        
+        let response = self.generateSentence(pickSentenceValues('scene_heading'),'.',sentiment,subject);
+    };
+
+
+    /**
+    * Generates a scene heading
+    * 
+    * @param {integer} sentiment - The sentimental value of the heading that is to be generated
+    * @param {string} narrative - The narrative of the sceenplay this scene is in
+    *
+    * @returns {string} - the scene heading
+    */
+    self.generateHeading = function(sentiment, narrative){
+        //let subject = findSubject(narrative.sentenceObjects);
+        //TODO: gera fall sem greinir narrative textann og býr til sentenceObjects sem inniheldur groupings og types
+        let heading = self.generateSentence(pickSentenceValues('scene_heading'),'.',sentiment,null);
+        return heading;
     };
 
 
     //sentanceStructure describes how many occurances of each word there is in the sentance, in the correct order
     //punctuation describes what punctuation there is supposed to be at the end of the sentance 
     //sentiment describes the sentimental value of the sentence
-    self.generateSentence = function(sentenceStructure, punctuation, sentiment) {
+    self.generateSentence = function(sentenceStructure, punctuation, sentiment, subject) {
 
-    	var sentence = '';
+    	let sentenceText = '';
+        let sentenceObjects = [];
+        let sentence = {};
 
-    	for (var type in sentenceStructure) {
+    	for (let type in sentenceStructure) {
 
-    		for(var i = 0; i<sentenceStructure[type]; i++)
+    		for(let i = 0; i<sentenceStructure[type]; i++)
       		{
+                let grouping = type;
       			//console.log(typeof type);
-      			var newWord = pickWord(type,sentiment);
-      			sentence = sentence + newWord + ' ';
+                if(type === 'noun' && subject !== null)
+                {
+                    grouping = subject;
+                }
+      			let newWord = pickWord(grouping,sentiment);
+      			sentenceText = sentenceText + newWord.word + ' ';
+                sentenceObjects.push(newWord);
       		}
-
     	}
     	    	
-    	sentence = capitalizeFirstLetter(sentence);
-    	sentence = addPunctuation(sentence, punctuation);
+    	sentenceText = capitalizeFirstLetter(sentenceText);
+    	sentenceText = addPunctuation(sentenceText, punctuation);
+        sentence['sentenceObjects'] = sentenceObjects;
+        sentence['sentenceText'] = sentenceText;        
     	return sentence;
-    }
+    };
 
 };
 

@@ -3,21 +3,19 @@ var ScriptGenerator = function(descr) {
   for (var property in descr) {
     self[property] = descr[property];
   }
+  var Script = require('../entities/Script');
+    
+  const SentenceGeneratorModule = require('../generators/SentenceGenerator');
+  const SentenceGenerator = new SentenceGeneratorModule();
 
-  //disposition defines how negative or positive the narrative is, 100 being 100% positive and 1 being 100% negative
-  self.narrative = {disposition : 100, description : ''};
-
-  self.generateNarrative = function(description) {
-  	self.narrative.description = description;
-  	self.narrative.disposition = self.analyzeDescription(description);
+  self.generateScript = function(characters, description) {
+    
+    let script = new Script({characters : characters,narrative : description,sentence_generator: SentenceGenerator});
+    let screenplay = script.generateScenes();
+    console.log('THIS IS THE SCREENPLAY: ',screenplay);
   }
 
-  self.analyzeDescription = function(description) {
-  	//do some some analysis of the disposition of the description
 
-  	return 1;
-
-  }
 
 
 };
