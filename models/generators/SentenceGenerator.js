@@ -14,7 +14,6 @@ const SentenceGenerator = function(descr) {
 	databaseInterface.init();
     //databaseInterface.addSentences();
     self.init = function() {
-
         function setData(data, type){ self[type] = data; console.log(data);}
         databaseInterface.getWords(setData, 'words');
         databaseInterface.getSentences(setData, 'sentences');
@@ -80,10 +79,11 @@ const SentenceGenerator = function(descr) {
         let subject = 'none';
         for(let i = 0; i<sentence.length; i++)
         {
+            console.log('word object: ',sentence[i]);
             if(sentence[i].type === 'noun') subject = sentence[i].grouping;
         }
         console.log('found the following subject',subject);
-        return subject;
+        return null;
     }
 
     //PUBLIC METHODS
@@ -92,18 +92,17 @@ const SentenceGenerator = function(descr) {
 
     self.generateQuestion = function(sentiment) {
     	
-        let question = self.generateSentence(pickSentenceValues('wh_question'),'?',sentiment,null);        
+        let question = self.generateSentence(pickSentenceValues('wh_question'),'?',sentiment,null);
     	//console.log('received the following question: ');
     	//console.log(question);
         return question;
     };
 
-    self.generateResponse = function(sentiment,previousSentance){
-        
+    self.generateResponse = function(sentiment,previousSentance){    
         
         let subject = findSubject(previousSentance.sentenceObjects);
-        
-        let response = self.generateSentence(pickSentenceValues('scene_heading'),'.',sentiment,subject);
+        let response = self.generateSentence(pickSentenceValues('statement'),'.',sentiment,subject);
+        return response;
     };
 
 
@@ -113,12 +112,12 @@ const SentenceGenerator = function(descr) {
     * @param {integer} sentiment - The sentimental value of the heading that is to be generated
     * @param {string} narrative - The narrative of the sceenplay this scene is in
     *
-    * @returns {string} - the scene heading
+    * @returns {string} - The scene heading
     */
     self.generateHeading = function(sentiment, narrative){
         //let subject = findSubject(narrative.sentenceObjects);
         //TODO: gera fall sem greinir narrative textann og býr til sentenceObjects sem inniheldur groupings og types
-        let heading = self.generateSentence(pickSentenceValues('scene_heading'),'.',sentiment,null);
+        let heading = self.generateSentence(pickSentenceValues('statement'),'.',sentiment,null);
         return heading;
     };
 

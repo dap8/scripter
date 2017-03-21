@@ -287,18 +287,40 @@ self.loadInitialData = function() {
 
 };
 
+
+
 self.addSentences = function(){
 
   pool.connect(function(err, client, done) {
   if(err) {
     return console.error('error fetching client from pool', err);
   }
+
+  console.log('entering addSentences');
+
+  let drop = client.query('DROP TABLE SENTENCES');
   
-  for(let sentence_type in sentences)
-  {    
+    
+
+  drop.on('end', function(result) {
+    
+    let create = client.query('CREATE TABLE SENTENCES(_id SERIAL PRIMARY KEY, type TEXT, structure TEXT)');
+    create.on('end',function(result){
+      
+      for(let sentence_type in sentences)
+      {             
+        client.query('INSERT INTO SENTENCES(type, structure) VALUES($1,$2)',[sentence_type,JSON.stringify(sentences[sentence_type])]);
+      }
+
+    });
+  });
  
-    client.query('INSERT INTO SENTENCES(type, structure) VALUES($1,$2)',[sentence_type,JSON.stringify(sentences[sentence_type])]);
-  }
+
+
+
+
+  
+  
  
   done();
 
@@ -307,10 +329,10 @@ self.addSentences = function(){
 
 };
 
-var sentences = 
+const sentences = 
 {
   wh_question : {wh_question: {min : 1, max : 1}, verb : {min : 1, max : 1}, adjective : {min : 1, max : 1}, noun: {min : 1, max : 1},},
-  scene_heading : {preposition: {min: 1, max : 1}, adjective: {min: 1, max: 2}, noun: {min: 1, max: 1}, verb : {min: 1, max: 1}, noun: {min: 1, max: 1}}
+  statement : {preposition: {min: 1, max : 1}, adjective: {min: 1, max: 2}, noun: {min: 1, max: 1}, verb : {min: 1, max: 1}, noun: {min: 1, max: 1}}
 }
 
 

@@ -65,15 +65,28 @@ const Scene = function(descr) {
 
   function generateDialogue() {
   	let dialogue = [];
+    let dialogue_objects = [];
   	let characterNumber = 0;
   	for(let i = 0; i<=DIALOGUE_LENGTH; i++)
   	{
   		let sentimental_value = determineSentiment('dialogue',self.characters[characterNumber]);
   		let speaker = self.characters[characterNumber].name;
-  		let generatedText = self.sentence_generator.generateQuestion(sentimental_value);
+      let generatedText = '';
+      let oddNumber = i%2 === 1;
+      if(oddNumber)
+      {
+        let previous_sentence = dialogue_objects[i-1];
+        //generatedText = self.sentence_generator.generateQuestion(sentimental_value);
+        generatedText = self.sentence_generator.generateResponse(sentimental_value,previous_sentence);
+      }
+      else {
+        generatedText = self.sentence_generator.generateQuestion(sentimental_value);  
+      }
+  		
   		influenceCharacters(generatedText.sentenceText,speaker);
   		let sentence = speaker + ': ' + generatedText.sentenceText;
   		dialogue.push(sentence);
+      dialogue_objects.push(generatedText);
   		characterNumber++;
   		if(characterNumber >= self.characters.length) characterNumber = 0;
   	}
