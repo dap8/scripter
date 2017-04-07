@@ -1,5 +1,14 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
+  .header
+    p Scripter
+  main
+    .title
+      p Enter the title of your screenplay
+      input
+    .characters
+      p Add characters
+      .add        
+        i.material-icons.md-48 add_box
+    .screenplay

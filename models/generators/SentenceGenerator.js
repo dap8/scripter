@@ -13,6 +13,7 @@ const SentenceGenerator = function(descr) {
 	const databaseInterface = new pg_databaseInterfaceModule();
 	databaseInterface.init();
     //databaseInterface.addSentences();
+    //
     self.init = function() {
         function setData(data, type){ self[type] = data; console.log(data);}
         databaseInterface.getWords(setData, 'words');
@@ -29,28 +30,54 @@ const SentenceGenerator = function(descr) {
 	  	return Math.floor(Math.random() * (max - min)) + min;
 	}
 
-    function findWords(sentiment, type)
+    function pickRandomGrouping(groupings)
     {
-        
-        if(self.words[sentiment].hasOwnProperty(type))
-        {            
-            return self.words[sentiment][type];
-        } 
-        if(self.words[NEUTRAL_VALUE].hasOwnProperty(type))
-        {                 
-            return self.words[NEUTRAL_VALUE][type];
-        } 
-
-        for(let sentiment in self.words)
+        let rand = getRandom(0,Object.keys(groupings).length)
+        let i = 0;
+        for(grouping in groupings)
         {
-            if(self.words[sentiment].hasOwnProperty(type)) return self.words[sentiment][type];
+            if(i === rand) return grouping;
+            i++;
+        }
+    }
+
+    function findWords(sentiment, type, grouping)
+    {
+        //console.log('entered findWords with the following grouping: ',grouping);
+        
+        let grouplessNoun = type === 'noun' && grouping === 'none';
+
+        if(self.words[sentiment].hasOwnProperty(type))
+        {    
+            if(grouplessNoun) grouping = pickRandomGrouping(self.words[sentiment][type]);
+            if(self.words[sentiment][type].hasOwnProperty(grouping)) return self.words[sentiment][type][grouping];            
         }
 
+        if(self.words[NEUTRAL_VALUE].hasOwnProperty(type))
+        {                 
+            if(grouplessNoun) grouping = pickRandomGrouping(self.words[sentiment][type]);
+            if(self.words[NEUTRAL_VALUE][type].hasOwnProperty(grouping)) return self.words[NEUTRAL_VALUE][type][grouping];            
+        }
+
+        for(let sent in self.words)
+        {            
+            if(self.words[sent].hasOwnProperty(type))
+            {
+                if(grouplessNoun) grouping = pickRandomGrouping(self.words[sentiment][type]);
+                if(self.words[sent][type].hasOwnProperty(grouping))
+                {                    
+                    return self.words[sent][type][grouping];
+                }
+            }
+        }
+
+        console.log('****RETURNING EMPTY ARRAY****');
         return [];
     }
     
-    function pickWord(type, sentiment) {
-    	let words = findWords(sentiment,type);        
+    function pickWord(sentiment, type, grouping) {
+    	let words = findWords(sentiment,type,grouping);
+        //console.log('words array received from findWords',words.length);
     	let numOfWords = words.length;
     	let pickedWord = words[getRandom(0,numOfWords)];
     	return pickedWord;
@@ -61,7 +88,7 @@ const SentenceGenerator = function(descr) {
 
     function pickSentenceValues(structure)
     {
-        let originalStructure = self.sentences[structure];        
+        let originalStructure = self.sentences[structure];
         let structureWithValues = [];
         let min = 1;
         let max = 1;
@@ -75,33 +102,34 @@ const SentenceGenerator = function(descr) {
         return structureWithValues;
     }
 
+
     function findSubject(sentence){
         let subject = 'none';
         for(let i = 0; i<sentence.length; i++)
         {
-            console.log('word object: ',sentence[i]);
+            //console.log('word object: ',sentence[i]);
             if(sentence[i].type === 'noun') subject = sentence[i].grouping;
         }
-        console.log('found the following subject',subject);
-        return null;
+        //console.log('found the following subject',subject);
+        return subject;
     }
 
     //PUBLIC METHODS
 
     
 
-    self.generateQuestion = function(sentiment) {
-    	
+    self.generateQuestion = function(sentiment) {    	
         let question = self.generateSentence(pickSentenceValues('wh_question'),'?',sentiment,null);
     	//console.log('received the following question: ');
     	//console.log(question);
         return question;
     };
 
-    self.generateResponse = function(sentiment,previousSentance){    
-        
+    self.generateResponse = function(sentiment,previousSentance){        
         let subject = findSubject(previousSentance.sentenceObjects);
+        console.log('subject before responding: ' + subject);
         let response = self.generateSentence(pickSentenceValues('statement'),'.',sentiment,subject);
+        console.log('subject after responding: ' + findSubject(response.sentenceObjects));
         return response;
     };
 
@@ -110,7 +138,7 @@ const SentenceGenerator = function(descr) {
     * Generates a scene heading
     * 
     * @param {integer} sentiment - The sentimental value of the heading that is to be generated
-    * @param {string} narrative - The narrative of the sceenplay this scene is in
+    * @param {string} narrative - The narrative of the sceenplay the scene is in
     *
     * @returns {string} - The scene heading
     */
@@ -133,17 +161,25 @@ const SentenceGenerator = function(descr) {
 
     	for (let type in sentenceStructure) {
 
+
     		for(let i = 0; i<sentenceStructure[type]; i++)
-      		{
-                let grouping = type;
+      		{                
+                let word_type = type;             
+                let grouping = 'none';
+
+                if(word_type === 'wh_question')
+                {                    
+                    grouping = word_type;
+                    word_type = 'pronoun';                    
+                } 
       			//console.log(typeof type);
                 if(type === 'noun' && subject !== null)
                 {
                     grouping = subject;
                 }
-      			let newWord = pickWord(grouping,sentiment);
-      			sentenceText = sentenceText + newWord.word + ' ';
-                sentenceObjects.push(newWord);
+      			let new_word = pickWord(sentiment,word_type,grouping);
+      			sentenceText = sentenceText + new_word.word + ' ';
+                sentenceObjects.push(new_word);
       		}
     	}
     	    	

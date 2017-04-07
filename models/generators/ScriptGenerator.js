@@ -13,6 +13,8 @@ var ScriptGenerator = function(descr) {
     let script = new Script({characters : characters,narrative : description,sentence_generator: SentenceGenerator});
     let screenplay = script.generateScenes();
     console.log('THIS IS THE SCREENPLAY: ',screenplay);
+    return screenplay;
+    
   }
 
 

@@ -73,8 +73,7 @@ self.getWords = function(deliverData, type)
   
   var query = client.query('SELECT * FROM WORDS');
 
-  var words = [];
-  var hasGrouping = false;
+  var words = [];  
   
   query.on('row', function(row, result) {
       var word = {
@@ -84,25 +83,20 @@ self.getWords = function(deliverData, type)
           type : row.type,
         }
       
-      hasGrouping = word.grouping !== 'none';
+      let grouped = word.grouping !== 'none';
+      let groupedNoun = word.type === 'noun' && grouped;
+      let groupedVerb = word.type === 'verb' && grouped;
+      let groupedAdj = word.type === 'adjective' && grouped;
+      let groupedAdv = word.type === 'adverb' && grouped;
 
-      if(!words.hasOwnProperty(word.sentiment))
+
+      if(groupedNoun || word.type !== 'noun')
       {
-        words[word.sentiment] = [];
-      } 
-
-      if(hasGrouping)
-      {        
-        if(!words[word.sentiment].hasOwnProperty(word.grouping)) words[word.sentiment][word.grouping] = [];          
-        words[word.sentiment][word.grouping].push(word);
+        if(!words.hasOwnProperty(word.sentiment)) words[word.sentiment] = [];
+        if(!words[word.sentiment].hasOwnProperty(word.type)) words[word.sentiment][word.type] = [];
+        if(!words[word.sentiment][word.type].hasOwnProperty(word.grouping)) words[word.sentiment][word.type][word.grouping] = [];
+        words[word.sentiment][word.type][word.grouping].push(word);
       }
-
-      else
-      {
-        if(!words[word.sentiment].hasOwnProperty(word.type)) words[word.sentiment][word.type] = [];          
-        words[word.sentiment][word.type].push(word);
-      }
-
 
     });
     query.on('end', function(result) {

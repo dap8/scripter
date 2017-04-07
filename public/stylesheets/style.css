@@ -1,8 +1,69 @@
-body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+html,body 
+{
+	height: 100%;
 }
 
-a {
-  color: #00B7FF;
+body {
+  margin: 0px;
+  padding: 0px;
+  background: #50C5B7;
+  /* background: rgb(50,50,50);*/
+  /* font-family: 'Titillium Web', sans-serif; */
+  font-family: 'Courier', sans-serif;
 }
+
+.header {
+	height: 20%;	
+	font-size: 5em;
+	color: rgb(0,0,0);
+	background: #EAF2E3;
+	padding-top: 1%;
+
+}
+
+.header p {
+	text-align: center;
+	vertical-align: middle;
+	margin: auto;
+}
+
+main {	
+	display: flex;
+	flex-direction: column;
+}
+
+.title {
+	margin: auto;
+	margin-top: 5%;
+}
+
+input:focus {
+	outline: none;
+}
+
+.title input {
+	display: flex;
+	justify-content: center;
+	justify-content: space-around;
+	margin:auto;
+	border:none;
+	border-bottom: 0.1em solid black;
+	background:none;
+	text-align: center;
+	font-family: 'Courier', sans-serif;
+}
+
+.characters {
+
+	margin:auto;
+	margin-top: 2.5%;
+}
+
+.add {
+	display: flex;
+	justify-content: center;
+	justify-content: space-around;
+
+
+}
+

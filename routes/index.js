@@ -7,8 +7,8 @@ var SentenceGenerator = new SentenceGeneratorModule();*/
 var ScriptGeneratorModule = require('../models/generators/ScriptGenerator');
 var ScriptGenerator = new ScriptGeneratorModule();
 
-let characters = [{name : 'bob', sentiment : 0}, {name: 'tom', sentiment: 0}];
-let bad_narrative = 'Horrible terrible evil narrative rape torture murder';
+let characters = [{name : 'bob', sentiment : -4}, {name: 'tom', sentiment: -4}];
+let bad_narrative = 'Horrible terrible evil bad narrative torture murder';
 let neutral_narrative = 'Hello';
 
 //ScriptGenerator.generateScript(['bob','tom'],'Happy narrative');
@@ -24,8 +24,13 @@ let neutral_narrative = 'Hello';
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  //res.render('index', { title: 'Express' });
-  ScriptGenerator.generateScript(characters,neutral_narrative);
+  res.render('index');  
+});
+
+
+router.get('/generateScript', function(req, res, next) {  
+  res.send(ScriptGenerator.generateScript(characters,bad_narrative));
+
   
 });
 

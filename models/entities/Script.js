@@ -4,7 +4,7 @@ const Script = function(descr) {
   	self[property] = descr[property];
   }
 
-  const numOfScenes = 2;
+  const NUM_OF_SCENES = 3;
   
   const sentiment = require('sentiment');
   const Scene = require('./Scene');
@@ -14,7 +14,7 @@ const Script = function(descr) {
 
 	let scenes = [];
 
-	for(let i = 0; i<numOfScenes; i++)
+	for(let i = 0; i<NUM_OF_SCENES; i++)
 	{
 		let sceneObject = {
 			narrative : self.narrative,
