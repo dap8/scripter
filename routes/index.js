@@ -28,10 +28,15 @@ router.get('/', function(req, res, next) {
 });
 
 
-router.get('/generateScript', function(req, res, next) {  
-  res.send(ScriptGenerator.generateScript(characters,bad_narrative));
+router.post('/generateScript', function(req, res, next) {
 
-  
+	console.log('called generateScript route');
+
+	console.log('recieved this query: ',req.body.query);
+
+	let query = JSON.parse(req.body.query);
+
+    res.send(ScriptGenerator.generateScript(query.characters, query.plot, query.title));  
 });
 
 module.exports = router;

@@ -6,9 +6,16 @@ block content
   main
     .title
       p Enter the title of your screenplay
-      input
+      input.titleInput
     .characters
       p Add characters
-      .add        
-        i.material-icons.md-48 add_box
-    .screenplay
+      .add
+        a.addlink#addBtn(href='javascript:')
+          i.material-icons.md-48 add_box
+      .list
+    .plot
+      p Write a short plot for your screenplay
+      textarea.plotInput.autoExpand(rows='3' data-min-rows='3' placeholder='Plot')
+    .generate
+      button.generateBtn GENERATE     
+    .screenplay      

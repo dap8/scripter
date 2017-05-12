@@ -12,13 +12,28 @@ body {
   font-family: 'Courier', sans-serif;
 }
 
+/* CODEPEN STUFF */
+
+textarea{  
+  /* box-sizing: padding-box; */
+  overflow:hidden;
+  /* demo only: */
+  padding:0.8em; /* 10px */
+  width:18em; /* 250px */
+  font-size:1em; /* 14px */
+  margin:0.5em auto; /* 50px auto */
+  display:block;
+  border-radius:1em; /* 10px */
+  border:0.25em solid rgb(0,0,0); /* 6px solid #556677     */
+  font-family: 'Courier', sans-serif;
+}
+
 .header {
 	height: 20%;	
 	font-size: 5em;
 	color: rgb(0,0,0);
 	background: #EAF2E3;
 	padding-top: 1%;
-
 }
 
 .header p {
@@ -30,6 +45,8 @@ body {
 main {	
 	display: flex;
 	flex-direction: column;
+	text-align: center;
+	font-size:1.4em;
 }
 
 .title {
@@ -41,7 +58,7 @@ input:focus {
 	outline: none;
 }
 
-.title input {
+input {
 	display: flex;
 	justify-content: center;
 	justify-content: space-around;
@@ -51,19 +68,73 @@ input:focus {
 	background:none;
 	text-align: center;
 	font-family: 'Courier', sans-serif;
+	font-size: 1.3em;
 }
 
 .characters {
-
+	display: flex;
+	flex-direction: column;
+	justify-content: space-around;	
 	margin:auto;
 	margin-top: 2.5%;
 }
 
+
 .add {
 	display: flex;
+	flex-direction: column;
+	justify-content: space-around;	
+}
+/*
+a:visited {
+ 	text-decoration: none;
+ 	color:rgb(30,30,30); 
+}*/
+.add i{
+	font-size: 3em;
+	color:rgb(0,0,0);
+}
+
+.list {
+	display: flex;	
 	justify-content: center;
 	justify-content: space-around;
 
-
 }
 
+.entry {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	justify-content: space-around;
+	padding: 5em;
+}
+
+.generate {
+	margin-top: 3em;
+}
+
+.generate button {
+	height: 5em;
+	width: 15em;
+	border:none;
+	background-color: black;
+	font-family: 'Courier', sans-serif;
+	font-size: 0.8em;
+	color: #EAF2E3;
+}
+
+.screenplay {
+	display: flex;
+	flex-direction: column;
+	text-align: center;
+	margin:auto;
+	margin-top: 3em;
+	background-color: white;
+	width:60%;
+
+
+}
+/* CODEPEN STUFF STARTS */
+
+/* CODEPEN STUFF ENDS */

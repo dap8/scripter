@@ -10,6 +10,7 @@ const Scene = function(descr) {
  
   //console.log(this.characters);
   self.heading = generateHeading();
+  self.action = generateAction();
   self.dialogue = generateDialogue();
 
   
@@ -36,10 +37,10 @@ const Scene = function(descr) {
   	let sentimental_values = [];
   	//console.log('called determineSentiment with type: ' + type + ' and speaker: ' + speaker);
 
-  	if(type === 'heading')
+  	if(type === 'heading' || type === 'action')
   	{
   		for(let i = 0; i<self.characters.length; i++)
-	  	{  		
+	  	{
 	  		sentimental_values.push(integerSentiment(self.characters[i].sentiment));
 	  	}
   	}
@@ -52,21 +53,35 @@ const Scene = function(descr) {
 
   	let narrativeSentiment = self.sentiment_analyzer(self.narrative);
   	sentimental_values.push(integerSentiment(narrativeSentiment.comparative));
-  	//console.log('sentiment values:',sentimental_values);
   	return calculateSentiment(sentimental_values);
   };
 
   function integerSentiment(sentimental_value) {
 
-  	//console.log('called inteeger sentiment with this sentimental_value: ',sentimental_value);
   	if(sentimental_value > 0) return Math.ceil(sentimental_value);
   	else return Math.floor(sentimental_value);
   };
+
+  function getRandom(min,max){
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min)) + min;
+  }
+
+  function generateAction() {
+    console.log('made it to generateAction');
+    let character = self.characters[getRandom(0,self.characters.length)];
+    console.log('about to call action in sentence_generator');
+    let sentimental_value = determineSentiment('action',null);
+    let action = self.sentence_generator.generateAction(sentimental_value,character);
+    return action.sentenceText;
+  }
 
   function generateDialogue() {
   	let dialogue = [];
     let dialogue_objects = [];
   	let characterNumber = 0;
+    
   	for(let i = 0; i<=DIALOGUE_LENGTH; i++)
   	{
   		let sentimental_value = determineSentiment('dialogue',self.characters[characterNumber]);

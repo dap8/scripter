@@ -297,10 +297,10 @@ self.addSentences = function(){
     
 
   drop.on('end', function(result) {
-    
+    console.log('finished dropping');
     let create = client.query('CREATE TABLE SENTENCES(_id SERIAL PRIMARY KEY, type TEXT, structure TEXT)');
     create.on('end',function(result){
-      
+      console.log('finished creating');
       for(let sentence_type in sentences)
       {             
         client.query('INSERT INTO SENTENCES(type, structure) VALUES($1,$2)',[sentence_type,JSON.stringify(sentences[sentence_type])]);
@@ -326,7 +326,8 @@ self.addSentences = function(){
 const sentences = 
 {
   wh_question : {wh_question: {min : 1, max : 1}, verb : {min : 1, max : 1}, adjective : {min : 1, max : 1}, noun: {min : 1, max : 1},},
-  statement : {preposition: {min: 1, max : 1}, adjective: {min: 1, max: 2}, noun: {min: 1, max: 1}, verb : {min: 1, max: 1}, noun: {min: 1, max: 1}}
+  statement : {preposition: {min: 1, max : 1}, adjective: {min: 1, max: 2}, noun: {min: 1, max: 1}, verb : {min: 1, max: 1}, noun: {min: 1, max: 1}},
+  action : {name: {min: 1, max: 1}, verb: {min: 1, max: 1}, adjective: {min: 1, max:2}, noun: {min: 1, max: 1} }
 }
 
 

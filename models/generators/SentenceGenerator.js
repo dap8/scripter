@@ -11,15 +11,15 @@ const SentenceGenerator = function(descr) {
     const NEUTRAL_VALUE = 0;
     const pg_databaseInterfaceModule = require('../interfaces/pg_dbinterface');
 	const databaseInterface = new pg_databaseInterfaceModule();
-	databaseInterface.init();
-    //databaseInterface.addSentences();
-    //
+	//databaseInterface.addSentences();
+    databaseInterface.init();    
     self.init = function() {
         function setData(data, type){ self[type] = data; console.log(data);}
         databaseInterface.getWords(setData, 'words');
         databaseInterface.getSentences(setData, 'sentences');
     };
     self.init();
+
 
 
 	//PRIVATE METHODS
@@ -103,6 +103,8 @@ const SentenceGenerator = function(descr) {
     }
 
 
+
+    // Gera findsubject á plottið
     function findSubject(sentence){
         let subject = 'none';
         for(let i = 0; i<sentence.length; i++)
@@ -111,6 +113,8 @@ const SentenceGenerator = function(descr) {
             if(sentence[i].type === 'noun') subject = sentence[i].grouping;
         }
         //console.log('found the following subject',subject);
+
+        
         return subject;
     }
 
@@ -119,18 +123,23 @@ const SentenceGenerator = function(descr) {
     
 
     self.generateQuestion = function(sentiment) {    	
-        let question = self.generateSentence(pickSentenceValues('wh_question'),'?',sentiment,null);
-    	//console.log('received the following question: ');
-    	//console.log(question);
-        return question;
+        let question = self.generateSentence(pickSentenceValues('wh_question'),'?',sentiment,null,null);
+    	return question;
     };
 
     self.generateResponse = function(sentiment,previousSentance){        
         let subject = findSubject(previousSentance.sentenceObjects);
         console.log('subject before responding: ' + subject);
-        let response = self.generateSentence(pickSentenceValues('statement'),'.',sentiment,subject);
+        let response = self.generateSentence(pickSentenceValues('statement'),'.',sentiment,subject,null);
         console.log('subject after responding: ' + findSubject(response.sentenceObjects));
         return response;
+    };
+
+    self.generateAction = function(sentiment, character) {
+        //let subject = findSubject(previousSentance.sentenceObjects);
+        console.log('called generateAction in SentenceGenerator');
+        let action = self.generateSentence(pickSentenceValues('action'),'.',sentiment,null,character);
+        return action;
     };
 
 
@@ -145,7 +154,7 @@ const SentenceGenerator = function(descr) {
     self.generateHeading = function(sentiment, narrative){
         //let subject = findSubject(narrative.sentenceObjects);
         //TODO: gera fall sem greinir narrative textann og býr til sentenceObjects sem inniheldur groupings og types
-        let heading = self.generateSentence(pickSentenceValues('statement'),'.',sentiment,null);
+        let heading = self.generateSentence(pickSentenceValues('statement'),'.',sentiment,null, null);
         return heading;
     };
 
@@ -153,14 +162,13 @@ const SentenceGenerator = function(descr) {
     //sentanceStructure describes how many occurances of each word there is in the sentance, in the correct order
     //punctuation describes what punctuation there is supposed to be at the end of the sentance 
     //sentiment describes the sentimental value of the sentence
-    self.generateSentence = function(sentenceStructure, punctuation, sentiment, subject) {
+    self.generateSentence = function(sentenceStructure, punctuation, sentiment, subject, character) {
 
     	let sentenceText = '';
         let sentenceObjects = [];
         let sentence = {};
 
     	for (let type in sentenceStructure) {
-
 
     		for(let i = 0; i<sentenceStructure[type]; i++)
       		{                
@@ -170,23 +178,32 @@ const SentenceGenerator = function(descr) {
                 if(word_type === 'wh_question')
                 {                    
                     grouping = word_type;
-                    word_type = 'pronoun';                    
-                } 
+                    word_type = 'pronoun';
+                }
       			//console.log(typeof type);
                 if(type === 'noun' && subject !== null)
                 {
                     grouping = subject;
                 }
-      			let new_word = pickWord(sentiment,word_type,grouping);
-      			sentenceText = sentenceText + new_word.word + ' ';
-                sentenceObjects.push(new_word);
+                if(type !== 'name'){
+                    let new_word = pickWord(sentiment,word_type,grouping);
+                    sentenceText = sentenceText + new_word.word + ' ';
+                    sentenceObjects.push(new_word);
+                }
+
+                else{
+                    console.log('made it to character not null case');
+                    sentenceText = sentenceText + character.name + ' ';
+                    sentenceObjects.push({word : character, sentiment : character.sentiment, grouping : 'none', type: 'noun'});
+                }
+      			
       		}
     	}
     	    	
     	sentenceText = capitalizeFirstLetter(sentenceText);
     	sentenceText = addPunctuation(sentenceText, punctuation);
         sentence['sentenceObjects'] = sentenceObjects;
-        sentence['sentenceText'] = sentenceText;        
+        sentence['sentenceText'] = sentenceText;
     	return sentence;
     };
 
