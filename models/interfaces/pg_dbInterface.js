@@ -327,7 +327,8 @@ const sentences =
 {
   wh_question : {wh_question: {min : 1, max : 1}, verb : {min : 1, max : 1}, adjective : {min : 1, max : 1}, noun: {min : 1, max : 1},},
   statement : {preposition: {min: 1, max : 1}, adjective: {min: 1, max: 2}, noun: {min: 1, max: 1}, verb : {min: 1, max: 1}, noun: {min: 1, max: 1}},
-  action : {name: {min: 1, max: 1}, verb: {min: 1, max: 1}, adjective: {min: 1, max:2}, noun: {min: 1, max: 1} }
+  action : {name: {min: 1, max: 1}, verb: {min: 1, max: 1}, adjective: {min: 1, max:2}, noun: {min: 1, max: 1} },
+  heading : {noun: {min: 2, max: 2}}
 }
 
 

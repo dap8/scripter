@@ -13,46 +13,90 @@ const Script = function(descr) {
   const wordPOS = require('wordpos');
   const wordpos = new wordPOS();
 
+
+
   self.generateScenes = function()
   {
+    self.subject = null;
+    parsePlot(self.narrative);
+    while(self.subject === null) {require('deasync').sleep(100);}
+    //while(true) { if(self.subject !== null) break;/*console.log('stuck in while loop');*/}    
     analyzeCharacters();
 
-	let scenes = [];
+  	let scenes = [];
 
-	for(let i = 0; i<NUM_OF_SCENES; i++)
-	{
-    console.log('generated scene');
-		let sceneObject = {
-			narrative : self.narrative,
-			characters : self.characters,
-			sentiment_analyzer : sentiment,
-			sentence_generator : self.sentence_generator,
-		}
-		scenes.push(parseScene(new Scene(sceneObject)));
-	}
+  	for(let i = 0; i<NUM_OF_SCENES; i++)
+  	{
+      console.log('generated scene');
+  		let sceneObject = {
+  			narrative : self.narrative,
+  			characters : self.characters,
+  			sentiment_analyzer : sentiment,
+  			sentence_generator : self.sentence_generator,
+        subject : self.subject,
+  		}
+  		scenes.push(parseScene(new Scene(sceneObject)));
+  	}
 
-	return scenes;
-
+  	return scenes;
   }
 
 
   function parsePlot(plot){
     let words = plot.split(' ');
     //sentenceObjects.push({word : character, sentiment : character.sentiment, grouping : 'none', type: 'noun'});
+    let grouping = 'none';
+    let word_string = '';
+    //word_string = word_string.replace(/\r/,"");//Remove CR-LF symbol
+    let sentiment_value = '0';
+    let type = 'none';
+    let sentenceObjects = [];
+    console.log('content of words array: ',words);
 
     for(let i = 0; i<words.length; i++)
     {
-      wordPOS.lookup(words[i], function(result, word){
+      console.log('running loop');
+      wordpos.lookup('tree', function(result, word){
+      console.log('finished lookup');
+      grouping = 'none';
+      word_string = word;
+      sentiment_value = sentiment(word_string).score.toString();
+      if(typeof result[0] !== 'undefined')
+      {
+        for(let k = 0; k<result.length; k++)
+        {
+          grouping = result[0].lexName;
+          type = grouping.substring(0,grouping.indexOf('.'));
+          if(type === 'adj') type = 'adjective';
+          else if(type === 'adv') type = 'adverb';
+          else if(type === 'noun') break;
+        }
+        console.log('result is not undefined');
         
-      });
-    }
+      }
 
-    wordPOS.lookup()
-
-    wordPOS.getPOS(words, function(result){
-
+      let obj = {
+        type : type,
+        grouping : grouping,
+        word : word_string,
+        sentiment : sentiment,
+      }
+      sentenceObjects.push(obj);
+      console.log('sentenceObjects length: ',sentenceObjects.length);
+      console.log('words length',words.length);
+      if(sentenceObjects.length >= words.length) setSubject(sentenceObjects);
     });
 
+      
+    }
+    
+  }
+
+  function setSubject(plot){
+    console.log('called setSubject');
+    self.subject = self.sentence_generator.findSubject(plot);
+    console.log('set subject to: ',self.subject);
+    
   }
 
   //Mögulega nota wordpos og sentiment module til að athuga tilfinningagildi og hvaða lexnames orðin hafa

@@ -29,7 +29,7 @@ const Scene = function(descr) {
   
   function generateHeading() {
   	let sentimental_value = determineSentiment('heading',null);
-  	let heading = self.sentence_generator.generateHeading(sentimental_value,self.narrative);
+  	let heading = self.sentence_generator.generateHeading(sentimental_value,self.narrative,self.subject);
   	return heading.sentenceText = heading.sentenceText.toUpperCase();
   };
 
@@ -92,7 +92,7 @@ const Scene = function(descr) {
       {
         let previous_sentence = dialogue_objects[i-1];
         //generatedText = self.sentence_generator.generateQuestion(sentimental_value);
-        generatedText = self.sentence_generator.generateResponse(sentimental_value,previous_sentence);
+        generatedText = self.sentence_generator.generateResponse(sentimental_value,previous_sentence,self.subject);
       }
       else {
         generatedText = self.sentence_generator.generateQuestion(sentimental_value);  

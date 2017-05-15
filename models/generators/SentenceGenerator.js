@@ -13,6 +13,9 @@ const SentenceGenerator = function(descr) {
 	const databaseInterface = new pg_databaseInterfaceModule();
 	//databaseInterface.addSentences();
     databaseInterface.init();    
+    const PLACE_GROUPING = 'noun.location';
+    const TIME_GROUPING = 'noun.time';
+    const SCENE_SETTINGS = ['INT', 'EXT'];
     self.init = function() {
         function setData(data, type){ self[type] = data; console.log(data);}
         databaseInterface.getWords(setData, 'words');
@@ -105,7 +108,7 @@ const SentenceGenerator = function(descr) {
 
 
     // Gera findsubject á plottið
-    function findSubject(sentence){
+    self.findSubject = function(sentence){
         let subject = 'none';
         for(let i = 0; i<sentence.length; i++)
         {
@@ -123,22 +126,23 @@ const SentenceGenerator = function(descr) {
     
 
     self.generateQuestion = function(sentiment) {    	
-        let question = self.generateSentence(pickSentenceValues('wh_question'),'?',sentiment,null,null);
+        let question = self.generateSentence(pickSentenceValues('wh_question'),'?',sentiment,null,null,'question');
     	return question;
     };
 
-    self.generateResponse = function(sentiment,previousSentance){        
-        let subject = findSubject(previousSentance.sentenceObjects);
-        console.log('subject before responding: ' + subject);
-        let response = self.generateSentence(pickSentenceValues('statement'),'.',sentiment,subject,null);
-        console.log('subject after responding: ' + findSubject(response.sentenceObjects));
+    self.generateResponse = function(sentiment,previousSentance,subject){        
+        /*let subject = self.findSubject(previousSentance.sentenceObjects);
+        console.log('subject before responding: ' + subject);*/
+        console.log('got the following subject for response:',subject);
+        let response = self.generateSentence(pickSentenceValues('statement'),'.',sentiment,subject,null,'response');
+        //console.log('subject after responding: ' + self.findSubject(response.sentenceObjects));
         return response;
     };
 
     self.generateAction = function(sentiment, character) {
-        //let subject = findSubject(previousSentance.sentenceObjects);
+        //let subject = self.findSubject(previousSentance.sentenceObjects);
         console.log('called generateAction in SentenceGenerator');
-        let action = self.generateSentence(pickSentenceValues('action'),'.',sentiment,null,character);
+        let action = self.generateSentence(pickSentenceValues('action'),'.',sentiment,null,character, 'action');
         return action;
     };
 
@@ -151,10 +155,11 @@ const SentenceGenerator = function(descr) {
     *
     * @returns {string} - The scene heading
     */
-    self.generateHeading = function(sentiment, narrative){
+    //Gera interior, exterior blabla
+    self.generateHeading = function(sentiment, narrative, subject){
         //let subject = findSubject(narrative.sentenceObjects);
         //TODO: gera fall sem greinir narrative textann og býr til sentenceObjects sem inniheldur groupings og types
-        let heading = self.generateSentence(pickSentenceValues('statement'),'.',sentiment,null, null);
+        let heading = self.generateSentence(pickSentenceValues('heading'),'.',sentiment,subject, null, 'heading');
         return heading;
     };
 
@@ -162,7 +167,7 @@ const SentenceGenerator = function(descr) {
     //sentanceStructure describes how many occurances of each word there is in the sentance, in the correct order
     //punctuation describes what punctuation there is supposed to be at the end of the sentance 
     //sentiment describes the sentimental value of the sentence
-    self.generateSentence = function(sentenceStructure, punctuation, sentiment, subject, character) {
+    self.generateSentence = function(sentenceStructure, punctuation, sentiment, subject, character, sentenceType) {
 
     	let sentenceText = '';
         let sentenceObjects = [];
@@ -171,7 +176,7 @@ const SentenceGenerator = function(descr) {
     	for (let type in sentenceStructure) {
 
     		for(let i = 0; i<sentenceStructure[type]; i++)
-      		{                
+      		{
                 let word_type = type;             
                 let grouping = 'none';
 
@@ -183,11 +188,18 @@ const SentenceGenerator = function(descr) {
       			//console.log(typeof type);
                 if(type === 'noun' && subject !== null)
                 {
-                    grouping = subject;
+                    if(sentenceType === 'heading'){
+                        if(i === 0) grouping = PLACE_GROUPING;
+                        else grouping = TIME_GROUPING;
+                    }
+                    else grouping = subject;
                 }
                 if(type !== 'name'){
                     let new_word = pickWord(sentiment,word_type,grouping);
-                    sentenceText = sentenceText + new_word.word + ' ';
+                    if(sentenceType === 'heading' && i === 0){
+                        sentenceText = SCENE_SETTINGS[getRandom(0,SCENE_SETTINGS.length)] + '. ' + new_word.word + ' - ';
+                    }
+                    else sentenceText = sentenceText + new_word.word + ' ';                    
                     sentenceObjects.push(new_word);
                 }
 

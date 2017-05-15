@@ -12,7 +12,8 @@ body {
   font-family: 'Courier', sans-serif;
 }
 
-/* CODEPEN STUFF */
+/* CODEPEN STUFF STARTS */
+
 
 textarea{  
   /* box-sizing: padding-box; */
@@ -27,6 +28,8 @@ textarea{
   border:0.25em solid rgb(0,0,0); /* 6px solid #556677     */
   font-family: 'Courier', sans-serif;
 }
+
+/* CODEPEN STUFF ENDS */
 
 .header {
 	height: 20%;	
@@ -135,6 +138,4 @@ a:visited {
 
 
 }
-/* CODEPEN STUFF STARTS */
 
-/* CODEPEN STUFF ENDS */
