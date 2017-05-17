@@ -4,9 +4,10 @@ const Scene = function(descr) {
   	self[property] = descr[property];
   }
   
-  const DIALOGUE_LENGTH = 3;
+  const DIALOGUE_LENGTH = 6;
   const MAX_NEGATIVITY = -5;
   const MAX_POSITIVITY = 5;
+  const QUESTION_PROBABILITY = 4;
  
   //console.log(this.characters);
   self.heading = generateHeading();
@@ -82,20 +83,23 @@ const Scene = function(descr) {
     let dialogue_objects = [];
   	let characterNumber = 0;
     
-  	for(let i = 0; i<=DIALOGUE_LENGTH; i++)
+  	for(let i = 0; i<DIALOGUE_LENGTH; i++)
   	{
   		let sentimental_value = determineSentiment('dialogue',self.characters[characterNumber]);
   		let speaker = self.characters[characterNumber].name;
       let generatedText = '';
+      let num = getRandom(1,QUESTION_PROBABILITY+1);
+      let question = num === QUESTION_PROBABILITY;      
+
       let oddNumber = i%2 === 1;
-      if(oddNumber)
+      if(question)
       {
-        let previous_sentence = dialogue_objects[i-1];
-        //generatedText = self.sentence_generator.generateQuestion(sentimental_value);
-        generatedText = self.sentence_generator.generateResponse(sentimental_value,previous_sentence,self.subject);
+        generatedText = self.sentence_generator.generateQuestion(sentimental_value,self.subject);          
       }
       else {
-        generatedText = self.sentence_generator.generateQuestion(sentimental_value);  
+        let previous_sentence = dialogue_objects[i-1];
+        //generatedText = self.sentence_generator.generateQuestion(sentimental_value);
+        generatedText = self.sentence_generator.generateResponse(sentimental_value,previous_sentence,self.subject);        
       }
   		
   		influenceCharacters(generatedText.sentenceText,speaker);

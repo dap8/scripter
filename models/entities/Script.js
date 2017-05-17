@@ -6,7 +6,7 @@ const Script = function(descr) {
   	self[property] = descr[property];
   }
 
-  const NUM_OF_SCENES = 3;
+  const NUM_OF_SCENES = 6;
   
   const sentiment = require('sentiment');
   const Scene = require('./Scene');
@@ -19,8 +19,7 @@ const Script = function(descr) {
   {
     self.subject = null;
     parsePlot(self.narrative);
-    while(self.subject === null) {require('deasync').sleep(100);}
-    //while(true) { if(self.subject !== null) break;/*console.log('stuck in while loop');*/}    
+    while(self.subject === null) {require('deasync').sleep(100);}    
     analyzeCharacters();
 
   	let scenes = [];
@@ -56,7 +55,7 @@ const Script = function(descr) {
     for(let i = 0; i<words.length; i++)
     {
       console.log('running loop');
-      wordpos.lookup('tree', function(result, word){
+      wordpos.lookup(words[i], function(result, word){
       console.log('finished lookup');
       grouping = 'none';
       word_string = word;
@@ -65,13 +64,13 @@ const Script = function(descr) {
       {
         for(let k = 0; k<result.length; k++)
         {
-          grouping = result[0].lexName;
+          grouping = result[k].lexName;
           type = grouping.substring(0,grouping.indexOf('.'));
           if(type === 'adj') type = 'adjective';
           else if(type === 'adv') type = 'adverb';
           else if(type === 'noun') break;
         }
-        console.log('result is not undefined');
+        console.log('result is not undefined for word: ' + word + ' and has type: ' + type);
         
       }
 
@@ -98,12 +97,6 @@ const Script = function(descr) {
     console.log('set subject to: ',self.subject);
     
   }
-
-  //Mögulega nota wordpos og sentiment module til að athuga tilfinningagildi og hvaða lexnames orðin hafa
-  function analyzePlot(plot){
-
-  }
-
 
   function parseScene(scene){
   	let sceneText = {};

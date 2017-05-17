@@ -15,7 +15,7 @@ const SentenceGenerator = function(descr) {
     databaseInterface.init();    
     const PLACE_GROUPING = 'noun.location';
     const TIME_GROUPING = 'noun.time';
-    const SCENE_SETTINGS = ['INT', 'EXT'];
+    const SCENE_SETTINGS = ['INTERIOR', 'EXTERIOR'];
     self.init = function() {
         function setData(data, type){ self[type] = data; console.log(data);}
         databaseInterface.getWords(setData, 'words');
@@ -125,7 +125,8 @@ const SentenceGenerator = function(descr) {
 
     
 
-    self.generateQuestion = function(sentiment) {    	
+    self.generateQuestion = function(sentiment, subject)  {   	
+        console.log('called generateQuestion');
         let question = self.generateSentence(pickSentenceValues('wh_question'),'?',sentiment,null,null,'question');
     	return question;
     };
@@ -141,7 +142,6 @@ const SentenceGenerator = function(descr) {
 
     self.generateAction = function(sentiment, character) {
         //let subject = self.findSubject(previousSentance.sentenceObjects);
-        console.log('called generateAction in SentenceGenerator');
         let action = self.generateSentence(pickSentenceValues('action'),'.',sentiment,null,character, 'action');
         return action;
     };
@@ -155,7 +155,6 @@ const SentenceGenerator = function(descr) {
     *
     * @returns {string} - The scene heading
     */
-    //Gera interior, exterior blabla
     self.generateHeading = function(sentiment, narrative, subject){
         //let subject = findSubject(narrative.sentenceObjects);
         //TODO: gera fall sem greinir narrative textann og býr til sentenceObjects sem inniheldur groupings og types
@@ -203,8 +202,7 @@ const SentenceGenerator = function(descr) {
                     sentenceObjects.push(new_word);
                 }
 
-                else{
-                    console.log('made it to character not null case');
+                else{                    
                     sentenceText = sentenceText + character.name + ' ';
                     sentenceObjects.push({word : character, sentiment : character.sentiment, grouping : 'none', type: 'noun'});
                 }

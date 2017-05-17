@@ -11,13 +11,17 @@
     "deasync": "^0.1.9",
     "debug": "~2.2.0",
     "express": "~4.13.4",
+    "express-session": "^1.15.2",
     "jade": "~1.11.0",
     "mathjs": "^3.9.0",
     "morgan": "~1.7.0",
+    "nodemailer": "^4.0.1",
     "pg": "^6.1.2",
     "sentiment": "^3.0.1",
     "serve-favicon": "~2.3.0",
     "url": "^0.11.0",
-    "wordpos": "^1.1.2"
+    "validator": "^7.0.0",
+    "wordpos": "^1.1.2",
+    "xss": "^0.3.3"
   }
 }

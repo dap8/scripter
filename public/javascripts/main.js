@@ -4,16 +4,16 @@ $(document).ready(function() {
 
 
     $('#addBtn').click(function() {
-        addCharacter();
+      addCharacter();
     });
 
 
     $('.generateBtn').click( () => {
-        console.log('clicked generate');
-        let query = constructQuery();
-        if(query !== null) generateScript(query);
+      console.log('clicked generate');
+      let query = constructQuery();
+      console.log('query: ', query);
+      if(query !== null) generateScript(query);
     });
-
 
 });
 
@@ -85,36 +85,67 @@ function constructQuery() {
     characters : [],
     plot : '',
   }
-  query.title = $('.titleInput').val();
+  query.title = $('.oneliner').val();
+  console.log(query.title);
+  if(!onlyLetters(query.title))
+  {
+    console.log('title contains something other than letters');
+    errorMsg('title'); 
+    return null;
+  } 
+
   let entries = $('.entry');
-  //if(entries.length < 1) alert('Please enter more than two characters'); return null;
+  
+  if(entries.length < 2){
+    alert('Please enter two characters');
+    return null;
+  }  
   let characters = [];
   for(let i = 0; i<entries.length; i++)
   {
     let characterName = $(entries[i]).find('.name').val();
+    if(!onlyLetters(characterName)){
+      console.log('a character name contains something other than letters');
+      errorMsg('character name');
+      return null;
+    }  
     let characterDescription = $(entries[i]).find('textarea.description').val();
+    if(!onlyLetters(characterDescription)){
+      console.log('a character description contains something other than letters');
+      errorMsg('character description');
+      return null;
+    }  
     characters.push({name : characterName, description : characterDescription});
   }
 
   query.characters = characters;
 
   query.plot = $('.plotInput').val();
-
-  console.log(query);
+  if(!onlyLetters(query.plot)){
+    console.log('plot failed');
+    errorMsg('plot');
+    return null;
+  }
 
   return query;
 
 }
 
+function onlyLetters(string){
+  return /^\w+(\s+\w+)*$/.test(string);
+  //return /^[a-z., ],+$/i.test(string);
+}
+
+function errorMsg(type) {
+  alert('Your ' + type + ' is either empty or contains illegal characters');
+}
+
 function displayScript(script){
-  console.log('called displayScript');
-  console.log('this is the title: ',script.title);
   let screenplay = $('.screenplay');
   screenplay.empty();
   let title = $('<h1/>').text(script.title);  
   screenplay.append(title);
   let scenes = script.scenes;
-
 
   for(let i = 0; i<scenes.length; i++)
   {
@@ -130,6 +161,38 @@ function displayScript(script){
     screenplay.append(scene);
   }
 
+  displayEmail();
+}
+
+/*
+      p Save this script by emailing it
+      input.titleInput
+      button.generateBtn SEND
+*/
+
+function displayEmail() {
+  let send = $('.send');
+  send.empty();
+  let text = $('<p/>').text('Enter your email and press send to save the script');
+  let input = $('<input/>').addClass('oneliner email');
+  let sendBtn = $('<button/>').addClass('sendBtn').text('SEND').click( () => {
+    console.log('clicked send');
+    sendEmail();
+  });
+  send.append(text);
+  send.append(input);
+  send.append(sendBtn);
+
+}
+
+function sendEmail() {
+  let email = $('.email').val();
+  console.log('email value: ', email);
+  $.post('/sendScript', {email}, function(response) {    
+    console.log('**EMAIL RESPONSE**: ');
+    console.log(response);
+    alert(response.message);
+});
 }
 
 function parseDialogue(dialogue){
@@ -140,8 +203,4 @@ function parseDialogue(dialogue){
     dialogueDiv.append(sentence);
   }
   return dialogueDiv;
-}
-
-function initGenerateButton(){
-	
 }
