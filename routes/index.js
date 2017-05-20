@@ -66,7 +66,7 @@ router.post('/sendScript', function(req, res, next) {
 			console.log('got this email: ',email);
 			res.send({type : 'success', message : 'Email has been sent'});
 			//res.send('success');
-		} 
+		}
 		else{
 			res.send({type : 'error', message : 'Please enter a valid email address'});
 			//res.send('error');
